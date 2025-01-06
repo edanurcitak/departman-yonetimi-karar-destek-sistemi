@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departman Başarı Oranları</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .chart-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .btn {
+            margin: 0 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        h1 {
+            text-align: center;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+<div class="chart-container">
+    <h1>Departman Performans Grafiği</h1>
+
+    <div class="chart-controls">
+        <button id="downloadBtn" class="btn">Raporu İndir</button>
+    </div>
+
+    <div class="chart-wrapper">
+        <canvas id="myChart"></canvas>
+    </div>
+</div>
+
+<script>
+    fetch('http://localhost:3000/api/sirket-basari-oranlari')
+        .then(response => response.json())
+        .then(data => {
+            const labels = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+            const colorPalette = [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40',
+                '#FF6384',
+                '#C9CBCF',
+                '#4CAF50',
+                '#2196F3',
+                '#FF5722'
+            ];
+
+
+
+            const departmanIsimleri = [
+
+                "Web Programlama",
+                "Mobil Programlama",
+                "Back-End Programlama",
+                "Front-End Programlama",
+                "Veritabanı Yönetimi",
+                "Analiz ve Test",
+                "UX&UI Tasarım",
+                "Siber Güvenlik",
+                "Lojistik Departmanı",
+                "Kalite Kontrol",
+                "Yönetim Departmanı"
+            ];
+            const datasets = data.map((departman, index) => {
+                return {
+                    label: departmanIsimleri[index] || `Departman ${index + 1}`,
+                    data: [
+                        parseInt(departman.ocak),
+                        parseInt(departman.subat),
+                        parseInt(departman.mart),
+                        parseInt(departman.nisan),
+                        parseInt(departman.mayis),
+                        parseInt(departman.haziran),
+                        parseInt(departman.temmuz),
+                        parseInt(departman.agustos),
+                        parseInt(departman.eylul),
+                        parseInt(departman.ekim),
+                        parseInt(departman.kasim),
+                        parseInt(departman.aralik)
+                    ],
+                    borderColor: colorPalette[index % colorPalette.length],
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    fill: true,
+                };
+            });
+
+            const chartData = {
+                labels: labels,
+                datasets: datasets
+            };
+
+            const config = {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            onClick: (event, legendItem, legend) => {
+                                const index = legendItem.datasetIndex;
+                                const chart = legend.chart;
+                                const meta = chart.getDatasetMeta(index);
+
+                                meta.hidden = meta.hidden === true ? false : true;
+                                chart.update();
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Departman Başarı Oranları'
+                        }
+                    }
+                }
+            };
+
+            const myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
+
+
+            const chartContainer = document.querySelector('.chart-container');
+
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.addEventListener('click', () => {
+                const imageURL = myChart.toBase64Image();
+
+                const link = document.createElement('a');
+                link.download = 'departman-basari-raporu.png';
+                link.href = imageURL;
+                link.click();
+            });
+        })
+        .catch(error => console.error('Hata:', error));
+</script>
+</body>
+</html>

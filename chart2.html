@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proje Ciro Oranları</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .chart-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .btn {
+            margin: 0 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        h1 {
+            text-align: center;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+<div class="chart-container">
+    <h1>Ciro Analizi Grafiği</h1>
+
+    <div class="chart-controls">
+        <button id="downloadBtn" class="btn">Raporu İndir</button>
+    </div>
+
+    <div class="chart-wrapper">
+        <canvas id="projeChart"></canvas>
+    </div>
+</div>
+
+<script>
+    fetch('http://localhost:3000/api/ciro_oranlari')
+        .then(response => response.json())
+        .then(data => {
+            const projeAdlari = data.map(proje => proje.proje_adi);
+            const ciroOranlari = data.map(proje => proje.ciro_orani);
+            const altiAyOncekiDegerler = data.map(proje => proje.alti_ay_onceki_deger);
+            const tahminDegerler = data.map(proje => parseFloat(proje.tahmin_6_ay_sonra));
+
+            const config = {
+                type: 'line',
+                data: {
+                    labels: projeAdlari,
+                    datasets: [
+                        {
+                            label: 'Mevcut Ciro Oranı',
+                            data: ciroOranlari,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: '1 Yıl Önceki Ciro Oranı',
+                            data: altiAyOncekiDegerler,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: '1 Yıl Sonraki Tahmini Ciro',
+                            data: tahminDegerler,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Proje Ciro Oranları Karşılaştırması'
+                        },
+                        legend: {
+                            position: 'top',
+                            onClick: (event, legendItem, legend) => {
+                                const index = legendItem.datasetIndex;
+                                const chart = legend.chart;
+                                const meta = chart.getDatasetMeta(index);
+
+                                meta.hidden = meta.hidden === true ? false : true;
+                                chart.update();
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Ciro Oranı (%)'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    }
+                }
+            };
+
+            const ctx = document.getElementById('projeChart').getContext('2d');
+            const myChart = new Chart(ctx, config);
+
+            // Raporu İndir Butonu
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.addEventListener('click', () => {
+                // Chart'ı base64 image olarak al
+                const imageURL = myChart.toBase64Image();
+
+                // İndirme bağlantısı oluştur
+                const link = document.createElement('a');
+                link.download = 'proje-ciro-raporu.png';
+                link.href = imageURL;
+                link.click();
+            });
+        })
+        .catch(error => console.error('Hata:', error));
+</script>
+</body>
+</html>

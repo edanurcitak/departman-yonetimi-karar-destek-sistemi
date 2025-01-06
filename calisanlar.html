@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çalışanlar</title>
+    <!-- Bootstrap ve AdminLTE kütüphaneleri -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css" integrity="sha512-IuO+tczf4J43RzbCMEFggCWW5JuX78IrCJRFFBoQEXNvGI6gkUw4OjuwMidiS4Lm9Q2lILzpJwZuMWuSEeT9UQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js" integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css" integrity="sha512-1k7mWiTNoyx2XtmI96o+hdjP8nn0f3Z2N4oF/9ZZRgijyV4omsKOXEnqL1gKQNPy2MTSP9rIEWGcH/CInulptA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+</head>
+
+<body class="hold-transition sidebar-mini">
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Çalışanlar Tablosu -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Çalışanlar Tablosu</h3>
+                        </div>
+                        <div class="card-body">
+                            <table id="calisanlarTablo" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Ad Soyad</th>
+                                        <th>Departman</th>
+                                        <th>Performans Puanı(Yıllık)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Veritabanından gelen veriler burada listelenecek -->
+                                    <tr>
+                                        
+                                    </tr>
+                                    <!-- Diğer çalışanlar buraya eklenecek -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // DataTable ile tabloyu başlatıyoruz
+            $('#calisanlarTablo').DataTable();
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // AJAX ile verileri backend'den alıyoruz
+            $.get("http://localhost:3000/api/calisanlar", function(data) {
+                data.forEach(function(calisan) {
+                    // Tablonun tbody kısmına yeni satırlar ekleyin
+                    $('#calisanlarTablo tbody').append(`
+                        <tr>
+                                <td>${calisan.adSoyad}</td>
+                                <td>${calisan.departman}</td>
+                                <td>${calisan.performansPuani}</td>
+                        </tr>
+                    `);
+                });
+            });
+        });
+    </script>
+    
+    
+</body>
+
+</html>
